@@ -11,3 +11,11 @@ Backend: Speechmatics Speech Recognition API, Supabase, and LLM feedback
 3. Start the frontend:
    npm run dev
 The frontend runs at http://localhost:5173
+
+### For the Backend
+1. cd backend
+2. npm install
+3. create an .env file with the following contents
+
+```PORT=8080``` 
+4. npm run dev
