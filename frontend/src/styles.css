@@ -1,0 +1,46 @@
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.appShell {
+  min-height: 100vh;
+  background: #f7f8fa;
+}
+
+.workspace {
+  padding-block: 32px;
+}
+
+.pronunciationPanel {
+  border: 1px solid #dde3ea;
+  padding: 28px;
+}
+
+.wordPlaceholder {
+  background: #f2f5f7;
+  border: 1px dashed #bec8d2;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.targetWord {
+  font-size: clamp(1.75rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    padding-block: 20px;
+  }
+
+  .pronunciationPanel {
+    padding: 18px;
+  }
+}
