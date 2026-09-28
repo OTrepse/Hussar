@@ -15,8 +15,8 @@ container
     .inSingletonScope();
 
 container
-    .bind<UserController>(TYPES.UserController)
-    .to(UserController)
+    .bind<UserController>(UserController)
+    .toSelf()
     .inSingletonScope();
 
 //========PRACTICE ITEMS==========//
@@ -26,8 +26,9 @@ container
     .inSingletonScope();
 
 container
-    .bind(PracticeItemsController)
-    .toSelf();
+    .bind<PracticeItemsController>(PracticeItemsController)
+    .toSelf()
+    .inSingletonScope();
 
 export const iocContainer = {
     get: <T>(controller: new (...args: any[]) => T): T => {
