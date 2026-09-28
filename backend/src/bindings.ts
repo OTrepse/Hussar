@@ -1,5 +1,6 @@
 import { Container } from "inversify";
 
+import { AudioStashController } from "./controllers/audio_stash_controller.js";
 import { UserController } from "./controllers/user_controller.js";
 import { UserRepository } from "./repositories/user_repository.js";
 import { PracticeItemsController } from "./controllers/practice_item_controller.js";
@@ -28,6 +29,11 @@ container
 container
     .bind(PracticeItemsController)
     .toSelf();
+
+container
+    .bind<AudioStashController>(TYPES.AudioStashController)
+    .to(AudioStashController)
+    .inSingletonScope();
 
 export const iocContainer = {
     get: <T>(controller: new (...args: any[]) => T): T => {
