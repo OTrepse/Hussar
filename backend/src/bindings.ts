@@ -1,12 +1,15 @@
 import { Container } from "inversify";
 
-import { AudioStashController } from "./controllers/audio_stash_controller.js";
 import { UserController } from "./controllers/user_controller.js";
 import { UserRepository } from "./repositories/user_repository.js";
 import { PracticeItemsController } from "./controllers/practice_item_controller.js";
 import {PracticeItemsRepository, PracticeItemsRepositoryImpl} from "./repositories/practice_items_repository.js";
 import { TYPES } from "./services/types/types.js";
+import {SpeechmaticsService} from "./services/speechmatics_service.js";
+import {SpeechController} from "./controllers/speech_controller.js";
 
+
+// BASICALLY THE BINDINGS CREATE A NEW INSTANCE OF WHATEVER IS CALLED USING INVERSIFY
 const container = new Container();
 
 //========USER==========//
@@ -31,10 +34,18 @@ container
     .toSelf()
     .inSingletonScope();
 
+//========SPEECHMATICS SERVICE==========//
 container
-    .bind<AudioStashController>(TYPES.AudioStashController)
-    .to(AudioStashController)
+    .bind<SpeechmaticsService>(SpeechmaticsService)
+    .toSelf()
     .inSingletonScope();
+
+//========SPEECH==========//
+container
+    .bind<SpeechController>(SpeechController)
+    .toSelf()
+    .inSingletonScope();
+
 
 export const iocContainer = {
     get: <T>(controller: new (...args: any[]) => T): T => {

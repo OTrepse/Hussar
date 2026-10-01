@@ -3,5 +3,4 @@ export const TYPES = {
     UserController: Symbol.for("UserController"),
     PracticeItemsRepository: Symbol.for("PracticeItemsRepository"),
     PracticeItemsController: Symbol.for("PracticeItemsController"),
-    AudioStashController: Symbol.for("AudioStashController"),
 };
