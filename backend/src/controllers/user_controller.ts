@@ -1,31 +1,20 @@
-import { Router, type Request, type Response } from "express";
-import { inject, injectable } from "inversify";
+import {Controller, Get, Route, Tags} from "tsoa";
+import {inject, injectable} from "inversify";
 
-import { UserRepository } from "../repositories/user_repository.js";
-import { TYPES } from "../services/types/types.js";
+import {UserRepository} from "../repositories/user_repository.js";
+import {TYPES} from "../services/types/types.js";
 
+@Route("users")
+@Tags("Users")
 @injectable()
-export class UserController {
-
-    public readonly router = Router();
-
-    public constructor(
-        @inject(TYPES.UserRepository)
-        private readonly userRepository: UserRepository,
-    ) {
-        this.router.get("/test", this.test.bind(this));
+export class UserController extends Controller {
+    public constructor(@inject(TYPES.UserRepository) private readonly userRepository: UserRepository) {
+        super();
     }
 
-    private async test(
-        _req: Request,
-        res: Response,
-    ): Promise<void> {
-
+    @Get("test")
+    public async test(): Promise<{message: string}> {
         const message = await this.userRepository.test();
-
-        res.status(200).json({
-            message,
-        });
+        return { message };
     }
-
 }
