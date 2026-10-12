@@ -2,14 +2,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
 
 
-export async function transcribeAudio(audio: Blob): Promise<unknown> {
+export async function transcribeAudio(audio: Blob, practiceItemId: number): Promise<unknown> {
     // FORMAT DATA TO SEND TO BACKEND
     const formData = new FormData();
-    formData.append(
-        "audio",
-        audio,
-        "pronunciation.webm",
-    );
+    formData.append("audio", audio, "pronunciation.webm");
+    formData.append("practiceItemId", String(practiceItemId));
 
     // BACKEND URL HIT
     const response = await fetch(

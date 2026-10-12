@@ -24,12 +24,13 @@ export class SpeechmaticsService {
         audio: Buffer,
         filename: string,
         contentType: string,
+        expectedText: string,
     ): Promise<unknown> {
-
         const jobId = await this.createJob(
             audio,
             filename,
             contentType,
+            expectedText,
         );
 
         await this.waitForJob(jobId);
@@ -41,56 +42,51 @@ export class SpeechmaticsService {
         audio: Buffer,
         filename: string,
         contentType: string,
+        expectedText: string,
     ): Promise<string> {
-
         const formData = new FormData();
 
         const audioBlob = new Blob(
             [new Uint8Array(audio)],
-            {
-                type: contentType,
+            {type: contentType},
+        );
+
+        formData.append("data_file", audioBlob, filename);
+
+        const config = {
+            type: "transcription",
+            transcription_config: {
+                language: "pl",
+                additional_vocab: [
+                    {
+                        content: expectedText,
+                    },
+                ],
             },
-        );
+        };
 
-        formData.append(
-            "data_file",
-            audioBlob,
-            filename,
-        );
+        console.log("Speechmatics job config:", config);
 
-        formData.append(
-            "config",
-            JSON.stringify({
-                type: "transcription",
-                transcription_config: {
-                    language: "pl",
-                },
-            }),
-        );
+        formData.append("config", JSON.stringify(config));
 
         const response = await fetch(
             `${this.baseUrl}/jobs`,
             {
                 method: "POST",
                 headers: {
-                    Authorization:
-                        `Bearer ${this.apiKey}`,
+                    Authorization: `Bearer ${this.apiKey}`,
                 },
                 body: formData,
             },
         );
 
         if (!response.ok) {
-            const error = await response.text();
-
             throw new Error(
-                `Speechmatics job creation failed (${response.status}): ${error}`,
+                `Speechmatics job creation failed (${response.status}): ${await response.text()}`
             );
         }
 
-        const result = await response.json() as {
-            id: string;
-        };
+        const result = await response.json() as {id: string};
 
         return result.id;
     }

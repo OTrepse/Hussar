@@ -4,29 +4,58 @@ import {
     Container,
     Paper,
     Stack,
-    Typography
+    Typography,
+    MenuItem,
+    TextField
 } from "@mui/material";
-import {useState} from "react";
 import AudioRecorder from "../components/audio_recorder";
 import {
     transcribeAudio,
 } from "../api/speech_api";
+import {useEffect, useState} from "react";
+import {listPracticeItems} from "../api/practice_items_api";
+import type {PracticeItem} from "../types/practice_item";
 
 export default function PronunciationPage() {
     const [speechmaticsResult, setSpeechmaticsResult] = useState<unknown>(null);
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
+    const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+
+    const selectedItem = practiceItems.find(item => item.id === selectedItemId);
+
+    useEffect(() => {
+        listPracticeItems()
+            .then(items => {
+                setPracticeItems(items);
+
+                if (items.length > 0) {
+                    setSelectedItemId(items[0].id);
+                }
+            })
+            .catch(console.error);
+    }, []);
 
     async function handleRecordingComplete(audio: Blob) {
+        if (selectedItemId === null) return;
+
         try {
+            setIsTranscribing(true);
             setError(null);
             setSpeechmaticsResult(null);
-            setIsTranscribing(true);
-            const result = await transcribeAudio(audio);
+
+            const result = await transcribeAudio(audio, selectedItemId);
+
             setSpeechmaticsResult(result);
         } catch (error) {
             console.error(error);
-            setError(error instanceof Error ? error.message : "Transcription failed.");
+
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to transcribe audio."
+            );
         } finally {
             setIsTranscribing(false);
         }
@@ -61,52 +90,41 @@ export default function PronunciationPage() {
                         </Box>
 
                         <Box className="wordPlaceholder">
-
-                            <Typography
-                                variant="overline"
-                                color="text.secondary"
-                            >
-                                Speechmatics Response
-                            </Typography>
-
-                            {isTranscribing ? (
-
-                                <Stack
-                                    direction="row"
-                                    spacing={2}
-                                    alignItems="center"
-                                >
-                                    <CircularProgress
-                                        size={20}
-                                    />
-
-                                    <Typography>
-                                        Transcribing...
-                                    </Typography>
-                                </Stack>
-
-                            ) : (
-
-                                <Box
-                                    component="pre"
-                                    sx={{
-                                        whiteSpace: "pre-wrap",
-                                        overflowWrap: "anywhere",
-                                        textAlign: "left",
-                                        maxHeight: 400,
-                                        overflow: "auto",
+                            <Stack spacing={2}>
+                                <TextField
+                                    select
+                                    fullWidth
+                                    label="Practice Item"
+                                    value={selectedItemId ?? ""}
+                                    onChange={(event) => {
+                                        setSelectedItemId(Number(event.target.value));
+                                        setSpeechmaticsResult(null);
+                                        setError(null);
                                     }}
                                 >
-                                    {speechmaticsResult
-                                        ? JSON.stringify(
-                                            speechmaticsResult,
-                                            null,
-                                            2,
-                                        )
-                                        : "Record something to see the Speechmatics response."}
-                                </Box>
+                                    {practiceItems.map((item) => (
+                                        <MenuItem key={item.id} value={item.id}>
+                                            {item.polishText} — {item.englishText}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
 
-                            )}
+                                {selectedItem && (
+                                    <Box textAlign="center">
+                                        <Typography variant="h4">
+                                            {selectedItem.polishText}
+                                        </Typography>
+
+                                        <Typography color="text.secondary">
+                                            {selectedItem.englishText}
+                                        </Typography>
+
+                                        <Typography variant="body2">
+                                            Pronunciation: {selectedItem.phoneticPronunciationText}
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Stack>
                         </Box>
                         {error && (
                             <Typography color="error">
@@ -116,6 +134,29 @@ export default function PronunciationPage() {
                         <Box className="recordingPanel">
                             <AudioRecorder onRecordingComplete={handleRecordingComplete}/>
                         </Box>
+                        {isTranscribing && (
+                            <Box textAlign="center">
+                                <CircularProgress/>
+                                <Typography>
+                                    Processing pronunciation...
+                                </Typography>
+                            </Box>
+                        )}
+
+                        {speechmaticsResult !== null && (
+                            <Box
+                                component="pre"
+                                sx={{
+                                    whiteSpace: "pre-wrap",
+                                    overflowWrap: "anywhere",
+                                    maxHeight: 400,
+                                    overflow: "auto",
+                                    textAlign: "left",
+                                }}
+                            >
+                                {JSON.stringify(speechmaticsResult, null, 2)}
+                            </Box>
+                        )}
                     </Stack>
                 </Paper>
             </Container>
