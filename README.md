@@ -19,3 +19,5 @@ The frontend runs at http://localhost:5173
 
 ```PORT=8080``` 
 4. npm run dev
+5. npx tsoa routes
+6. npx tsoa spec

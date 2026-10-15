@@ -35,6 +35,15 @@ body {
   line-height: 1.1;
 }
 
+.recordingPanel {
+  border-top: 1px solid #dde3ea;
+  padding-top: 4px;
+}
+
+.recordingError {
+  margin-top: 10px;
+}
+
 @media (max-width: 760px) {
   .workspace {
     padding-block: 20px;
