@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { AuthProvider } from "./components/auth_provider";
 import "./styles.css";
 
 const theme = createTheme({
@@ -34,7 +35,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <CssBaseline />
         {/*WRAPPED APP IN BROWSER ROUTER SO IT CAN ROUTE*/}
         <BrowserRouter>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>
     </React.StrictMode>,

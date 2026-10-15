@@ -9,6 +9,7 @@ import {
     TextField
 } from "@mui/material";
 import AudioRecorder from "../components/audio_recorder";
+import AccountControls from "../components/account_controls";
 import {
     transcribeAudio,
 } from "../api/speech_api";
@@ -75,6 +76,7 @@ export default function PronunciationPage() {
                 >
 
                     <Stack spacing={3}>
+                        <AccountControls />
 
                         <Box>
                             <Typography
