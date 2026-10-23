@@ -21,3 +21,29 @@ The frontend runs at http://localhost:5173
 4. npm run dev
 5. npx tsoa routes
 6. npx tsoa spec
+
+## Supabase authentication
+
+The frontend reuses the existing React Router, MUI theme, and `/practice` page.
+One Supabase client and one auth provider handle login, account creation, email
+verification, password recovery, session persistence, and logout. The pronunciation
+recorder, transcription requests, backend endpoints, and backend environment are
+unchanged. The existing backend user repository is a test stub and is not used to
+store accounts or passwords.
+
+### Frontend environment
+
+Fill in `frontend/.env`
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8080
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
+
+
+### Supabase dashboard
+1. In Authentication > URL Configuration, set the Site URL to
+   `http://localhost:5173` for local development. Add these exact Redirect URLs:
+   `http://localhost:5173/auth/callback`
+   `http://localhost:5173/update-password`
