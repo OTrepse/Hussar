@@ -2,6 +2,7 @@ import {
     Box,
     CircularProgress,
     Container,
+    LinearProgress,
     Paper,
     Stack,
     Typography,
@@ -12,13 +13,14 @@ import AudioRecorder from "../components/audio_recorder";
 import AccountControls from "../components/account_controls";
 import {
     transcribeAudio,
+    type SpeechResponse
 } from "../api/speech_api";
 import {useEffect, useState} from "react";
 import {listPracticeItems} from "../api/practice_items_api";
 import type {PracticeItem} from "../types/practice_item";
 
 export default function PronunciationPage() {
-    const [speechmaticsResult, setSpeechmaticsResult] = useState<unknown>(null);
+    const [speechmaticsResult, setSpeechmaticsResult] = useState<SpeechResponse | null>(null);
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
@@ -143,6 +145,42 @@ export default function PronunciationPage() {
                                     Processing pronunciation...
                                 </Typography>
                             </Box>
+                        )}
+
+                        {speechmaticsResult?.evaluation && (
+                            <Paper variant="outlined" sx={{p: 3}}>
+                                <Stack spacing={2} alignItems="center">
+                                    <Typography variant="h6">
+                                        Pronunciation Evaluation
+                                    </Typography>
+
+                                    {speechmaticsResult.evaluation.score !== null ? (
+                                        <>
+                                            <Typography variant="h2">
+                                                {speechmaticsResult.evaluation.score}%
+                                            </Typography>
+
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={speechmaticsResult.evaluation.score}
+                                                sx={{width: "100%", height: 12, borderRadius: 2}}
+                                            />
+
+                                            <Typography>
+                                                {speechmaticsResult.evaluation.feedback}
+                                            </Typography>
+
+                                            <Typography variant="caption" color="text.secondary">
+                                                Experimental transcription-match score
+                                            </Typography>
+                                        </>
+                                    ) : (
+                                        <Typography color="text.secondary">
+                                            {speechmaticsResult.evaluation.feedback}
+                                        </Typography>
+                                    )}
+                                </Stack>
+                            </Paper>
                         )}
 
                         {speechmaticsResult !== null && (

@@ -1,4 +1,5 @@
 import {injectable} from "inversify";
+import {PronunciationEvaluator} from "./pronunciation_evaluator.js";
 
 @injectable()
 export class SpeechmaticsService {
@@ -32,16 +33,19 @@ export class SpeechmaticsService {
             this.runJob(audio, filename, contentType, expectedText, true),
         ]);
 
+        const results = jobs.map((job, index) => ({
+            type: index === 0 ? "standard" : "enhanced_contextual",
+            status: job.status,
+            ...(job.status === "fulfilled"
+                    ? {transcript: job.value}
+                    : {error: String(job.reason)}
+            ),
+        }));
+
         return {
             expectedText,
-            results: jobs.map((job, index) => ({
-                type: index === 0 ? "standard" : "enhanced_contextual",
-                status: job.status,
-                ...(job.status === "fulfilled"
-                        ? {transcript: job.value}
-                        : {error: String(job.reason)}
-                ),
-            })),
+            evaluation: PronunciationEvaluator.evaluate(expectedText, results),
+            results,
         };
     }
 

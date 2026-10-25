@@ -4,8 +4,20 @@ const API_BASE_URL = (
     "http://localhost:8080"
 ).replace(/\/+$/, "");
 
+export interface PronunciationEvaluation {
+    score: number | null;
+    standardScore: number | null;
+    contextualScore: number | null;
+    feedback: string;
+}
 
-export async function transcribeAudio(audio: Blob, practiceItemId: number): Promise<unknown> {
+export interface SpeechResponse {
+    expectedText: string;
+    evaluation: PronunciationEvaluation;
+    results: unknown[];
+}
+
+export async function transcribeAudio(audio: Blob, practiceItemId: number): Promise<SpeechResponse> {
     // FORMAT DATA TO SEND TO BACKEND
     const formData = new FormData();
     formData.append("audio", audio, "pronunciation.webm");
