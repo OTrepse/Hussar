@@ -34,7 +34,6 @@ export class PracticeItemsRepositoryImpl
                 pi.english_text AS "englishText",
                 pi.difficulty,
                 pi.category,
-                pi.reference_audio AS "referenceAudio",
                 pi.phonetic_pronunciation_text AS "phoneticPronunciationText",
                 ARRAY(
                     SELECT c.name
@@ -50,7 +49,6 @@ export class PracticeItemsRepositoryImpl
         return result.rows.map(row => ({
             ...row,
             id: Number(row.id),
-            referenceAudio: row.referenceAudio ?? "",
             phoneticPronunciationText: row.phoneticPronunciationText ?? "",
         })) as PracticeItem[];
     }
@@ -65,7 +63,6 @@ export class PracticeItemsRepositoryImpl
                 pi.english_text AS "englishText",
                 pi.difficulty,
                 pi.category,
-                pi.reference_audio AS "referenceAudio",
                 pi.phonetic_pronunciation_text AS "phoneticPronunciationText",
                 ARRAY(
                     SELECT c.name
@@ -87,7 +84,6 @@ export class PracticeItemsRepositoryImpl
         return {
             ...row,
             id: Number(row.id),
-            referenceAudio: row.referenceAudio ?? "",
             phoneticPronunciationText: row.phoneticPronunciationText ?? "",
         } as PracticeItem;
     }

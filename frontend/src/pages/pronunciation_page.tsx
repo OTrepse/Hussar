@@ -7,7 +7,11 @@ import {
     Stack,
     Typography,
     MenuItem,
-    TextField
+    TextField,
+    Autocomplete,
+    Card,
+    CardActionArea,
+    CardContent, Button
 } from "@mui/material";
 import AudioRecorder from "../components/audio_recorder";
 import AccountControls from "../components/account_controls";
@@ -25,6 +29,15 @@ export default function PronunciationPage() {
     const [error, setError] = useState<string | null>(null);
     const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
     const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+    const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+
+    const courses = [...new Set(
+        practiceItems.flatMap(item => item.courses)
+    )].sort();
+
+    const coursePracticeItems = practiceItems.filter(item =>
+        item.courses.includes(selectedCourse ?? "")
+    );
 
     const selectedItem = practiceItems.find(item => item.id === selectedItemId);
 
@@ -32,12 +45,11 @@ export default function PronunciationPage() {
         listPracticeItems()
             .then(items => {
                 setPracticeItems(items);
-
-                if (items.length > 0) {
-                    setSelectedItemId(items[0].id);
-                }
             })
-            .catch(console.error);
+            .catch(error => {
+                console.error(error);
+                setError("Failed to load practice items.");
+            });
     }, []);
 
     async function handleRecordingComplete(audio: Blob) {
@@ -93,109 +105,187 @@ export default function PronunciationPage() {
                             </Typography>
                         </Box>
 
-                        <Box className="wordPlaceholder">
-                            <Stack spacing={2}>
-                                <TextField
-                                    select
-                                    fullWidth
-                                    label="Practice Item"
-                                    value={selectedItemId ?? ""}
-                                    onChange={(event) => {
-                                        setSelectedItemId(Number(event.target.value));
-                                        setSpeechmaticsResult(null);
-                                        setError(null);
+                        {selectedCourse === null && (
+                            <Box>
+                                <Typography variant="h5" sx={{mb: 3}}>
+                                    Select a Course
+                                </Typography>
+
+                                <Box
+                                    sx={{
+                                        display: "grid",
+                                        gridTemplateColumns: {
+                                            xs: "1fr",
+                                            sm: "repeat(2, 1fr)",
+                                            md: "repeat(3, 1fr)"
+                                        },
+                                        gap: 2
                                     }}
                                 >
-                                    {practiceItems.map((item) => (
-                                        <MenuItem key={item.id} value={item.id}>
-                                            {item.polishText} — {item.englishText}
-                                        </MenuItem>
+                                    {courses.map(course => (
+                                        <Card key={course} variant="outlined">
+                                            <CardActionArea
+                                                onClick={() => {
+                                                    setSelectedCourse(course);
+                                                    setSelectedItemId(null);
+                                                    setSpeechmaticsResult(null);
+                                                    setError(null);
+                                                }}
+                                            >
+                                                <CardContent>
+                                                    <Typography variant="h5">
+                                                        {course}
+                                                    </Typography>
+
+                                                    <Typography color="text.secondary">
+                                                        {practiceItems.filter(item =>
+                                                            item.courses.includes(course)
+                                                        ).length} Practice Items
+                                                    </Typography>
+                                                </CardContent>
+                                            </CardActionArea>
+                                        </Card>
                                     ))}
-                                </TextField>
-
-                                {selectedItem && (
-                                    <Box textAlign="center">
-                                        <Typography variant="h4">
-                                            {selectedItem.polishText}
-                                        </Typography>
-
-                                        <Typography color="text.secondary">
-                                            {selectedItem.englishText}
-                                        </Typography>
-
-                                        <Typography variant="body2">
-                                            Pronunciation: {selectedItem.phoneticPronunciationText}
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Stack>
-                        </Box>
-                        {error && (
-                            <Typography color="error">
-                                {error}
-                            </Typography>
-                        )}
-                        <Box className="recordingPanel">
-                            <AudioRecorder onRecordingComplete={handleRecordingComplete}/>
-                        </Box>
-                        {isTranscribing && (
-                            <Box textAlign="center">
-                                <CircularProgress/>
-                                <Typography>
-                                    Processing pronunciation...
-                                </Typography>
+                                </Box>
                             </Box>
                         )}
 
-                        {speechmaticsResult?.evaluation && (
-                            <Paper variant="outlined" sx={{p: 3}}>
-                                <Stack spacing={2} alignItems="center">
-                                    <Typography variant="h6">
-                                        Pronunciation Evaluation
+                        {selectedCourse !== null && (
+                            <Box className="wordPlaceholder">
+                                <Stack spacing={3}>
+                                    <Box>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => {
+                                                setSelectedCourse(null);
+                                                setSelectedItemId(null);
+                                                setSpeechmaticsResult(null);
+                                                setError(null);
+                                            }}
+                                        >
+                                            Back to Courses
+                                        </Button>
+                                    </Box>
+
+                                    <Typography variant="h5">
+                                        {selectedCourse}
                                     </Typography>
 
-                                    {speechmaticsResult.evaluation.score !== null ? (
-                                        <>
-                                            <Typography variant="h2">
-                                                {speechmaticsResult.evaluation.score}%
+                                    <Autocomplete
+                                        fullWidth
+                                        options={coursePracticeItems}
+                                        value={selectedItem ?? null}
+                                        getOptionLabel={item =>
+                                            `${item.polishText} — ${item.englishText}`
+                                        }
+                                        isOptionEqualToValue={(option, value) =>
+                                            option.id === value.id
+                                        }
+                                        onChange={(_, item) => {
+                                            setSelectedItemId(item?.id ?? null);
+                                            setSpeechmaticsResult(null);
+                                            setError(null);
+                                        }}
+                                        renderInput={params => (
+                                            <TextField
+                                                {...params}
+                                                label="Select Practice Item"
+                                                placeholder="Search vocabulary..."
+                                            />
+                                        )}
+                                    />
+
+                                    {selectedItem && (
+                                        <Box textAlign="center">
+                                            <Typography variant="h4">
+                                                {selectedItem.polishText}
                                             </Typography>
 
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={speechmaticsResult.evaluation.score}
-                                                sx={{width: "100%", height: 12, borderRadius: 2}}
-                                            />
+                                            <Typography color="text.secondary">
+                                                {selectedItem.englishText}
+                                            </Typography>
 
-                                            <Typography>
-                                                {speechmaticsResult.evaluation.feedback}
+                                            <Typography variant="body2">
+                                                Pronunciation: {selectedItem.phoneticPronunciationText}
                                             </Typography>
 
                                             <Typography variant="caption" color="text.secondary">
-                                                Experimental transcription-match score
+                                                English translation and pronunciation are approximate.
                                             </Typography>
-                                        </>
-                                    ) : (
-                                        <Typography color="text.secondary">
-                                            {speechmaticsResult.evaluation.feedback}
-                                        </Typography>
+                                        </Box>
                                     )}
                                 </Stack>
-                            </Paper>
-                        )}
-
-                        {speechmaticsResult !== null && (
-                            <Box
-                                component="pre"
-                                sx={{
-                                    whiteSpace: "pre-wrap",
-                                    overflowWrap: "anywhere",
-                                    maxHeight: 400,
-                                    overflow: "auto",
-                                    textAlign: "left",
-                                }}
-                            >
-                                {JSON.stringify(speechmaticsResult, null, 2)}
                             </Box>
+                        )}
+                        {selectedCourse !== null && selectedItem !== undefined && (
+                            <>
+                                <Box className="recordingPanel">
+                                    <AudioRecorder
+                                        key={selectedItem.id}
+                                        onRecordingComplete={handleRecordingComplete}
+                                    />
+                                </Box>
+
+                                {isTranscribing && (
+                                    <Box textAlign="center">
+                                        <CircularProgress/>
+                                        <Typography>
+                                            Processing pronunciation...
+                                        </Typography>
+                                    </Box>
+                                )}
+
+                                {speechmaticsResult?.evaluation && (
+                                    <Paper variant="outlined" sx={{p: 3}}>
+                                        <Stack spacing={2} alignItems="center">
+                                            <Typography variant="h6">
+                                                Pronunciation Evaluation
+                                            </Typography>
+
+                                            {speechmaticsResult.evaluation.score !== null ? (
+                                                <>
+                                                    <Typography variant="h2">
+                                                        {speechmaticsResult.evaluation.score}%
+                                                    </Typography>
+
+                                                    <LinearProgress
+                                                        variant="determinate"
+                                                        value={speechmaticsResult.evaluation.score}
+                                                        sx={{width: "100%", height: 12, borderRadius: 2}}
+                                                    />
+
+                                                    <Typography>
+                                                        {speechmaticsResult.evaluation.feedback}
+                                                    </Typography>
+
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Experimental transcription-match score
+                                                    </Typography>
+                                                </>
+                                            ) : (
+                                                <Typography color="text.secondary">
+                                                    {speechmaticsResult.evaluation.feedback}
+                                                </Typography>
+                                            )}
+                                        </Stack>
+                                    </Paper>
+                                )}
+
+                                {speechmaticsResult !== null && (
+                                    <Box
+                                        component="pre"
+                                        sx={{
+                                            whiteSpace: "pre-wrap",
+                                            overflowWrap: "anywhere",
+                                            maxHeight: 400,
+                                            overflow: "auto",
+                                            textAlign: "left"
+                                        }}
+                                    >
+                                        {JSON.stringify(speechmaticsResult, null, 2)}
+                                    </Box>
+                                )}
+                            </>
                         )}
                     </Stack>
                 </Paper>
