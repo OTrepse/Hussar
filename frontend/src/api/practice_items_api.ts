@@ -1,8 +1,9 @@
 import type {PracticeItem} from "../types/practice_item";
 
-const API_BASE_URL =
+const API_BASE_URL = (
     import.meta.env.VITE_API_BASE_URL ??
-    "http://localhost:8080";
+    "http://localhost:8080"
+).replace(/\/+$/, "");
 
 export async function listPracticeItems(): Promise<PracticeItem[]> {
     const response = await fetch(
