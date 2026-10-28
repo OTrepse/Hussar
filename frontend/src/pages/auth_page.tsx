@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { Link as RouterLink, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "../api/supabase_client";
 import { useAuth } from "../components/auth_provider";
+import BrandMark from "../components/brand_mark";
 
 type AuthMode = "login" | "signup" | "reset-password" | "update-password" | "callback";
 
@@ -12,6 +13,14 @@ const titles: Record<AuthMode, string> = {
     "reset-password": "Reset Password",
     "update-password": "Set New Password",
     callback: "Email Verification",
+};
+
+const introductions: Record<AuthMode, string> = {
+    login: "Welcome back. Your next word is waiting.",
+    signup: "Start building your confidence, one Polish word at a time.",
+    "reset-password": "We'll help you get back to learning.",
+    "update-password": "Choose a new password for your Mówka account.",
+    callback: "A small step toward your Polish learning journey.",
 };
 
 export default function AuthPage({ mode }: { mode: AuthMode }) {
@@ -26,7 +35,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (session && (mode === "login" || mode === "signup" || mode === "callback")) {
-        return <Navigate to="/practice" replace />;
+        return <Navigate to="/" replace />;
     }
 
     const needsConfirmation = mode === "signup" || mode === "update-password";
@@ -76,7 +85,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                 const { error: authError } = await supabase.auth.updateUser({ password });
                 if (authError) throw authError;
                 finishPasswordRecovery();
-                navigate("/practice", { replace: true });
+                navigate("/", { replace: true });
             }
         } catch (authError) {
             setError(authError instanceof Error ? authError.message : "Authentication failed. Please try again.");
@@ -106,13 +115,21 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
     }
 
     return (
-        <Box className="appShell">
-            <Container maxWidth="sm" className="workspace">
-                <Paper className="pronunciationPanel" elevation={0}>
+        <Box component="main" className="appShell authShell" id="main-content">
+            <Container maxWidth="sm" className="authWorkspace">
+                <Box className="authBrand">
+                    <Link component={RouterLink} to="/" className="brand" underline="none" aria-label="Mówka home">
+                        <BrandMark />
+                        <span>Mówka</span>
+                    </Link>
+                    <Typography color="text.secondary">A little practice. A more confident Polish.</Typography>
+                </Box>
+                <Paper className="pronunciationPanel authCard" elevation={0}>
                     <Stack spacing={3}>
                         <Box>
+                            <Typography className="eyebrow">YOUR POLISH LEARNING JOURNEY</Typography>
                             <Typography variant="h4" component="h1">{titles[mode]}</Typography>
-                            <Typography>Polish pronunciation testing</Typography>
+                            <Typography color="text.secondary" sx={{ mt: 1 }}>{introductions[mode]}</Typography>
                         </Box>
                         {(error || sessionError) && <Alert severity="error">{error || sessionError}</Alert>}
                         {message && <Alert severity="success">{message}</Alert>}
@@ -123,7 +140,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                             <Alert severity="info">Open the password reset link from your email to set a new password. If the link has expired, request another below.</Alert>
                         )}
                         {mode !== "callback" && (mode !== "update-password" || session) && (
-                            <Box component="form" onSubmit={handleSubmit}>
+                            <Box component="form" onSubmit={handleSubmit} aria-busy={isSubmitting}>
                                 <Stack spacing={2}>
                                     {mode !== "update-password" && (
                                         <TextField
@@ -177,7 +194,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                                 Resend Verification Email
                             </Button>
                         )}
-                        <Stack spacing={1}>
+                        <Stack spacing={1} className="authLinks">
                             {mode !== "login" && <Link component={RouterLink} to="/login">Back to Login</Link>}
                             {mode === "login" && <Link component={RouterLink} to="/signup">Create Account</Link>}
                             {(mode === "login" || mode === "update-password") && (
@@ -186,6 +203,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                         </Stack>
                     </Stack>
                 </Paper>
+                <Typography className="authFootnote" color="text.secondary">Listen closely. Speak freely. Keep growing.</Typography>
             </Container>
         </Box>
     );

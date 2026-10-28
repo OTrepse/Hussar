@@ -17,6 +17,8 @@ interface AudioRecorderProps {
     onRecordingComplete?: (audio: Blob) => void;
     onRecordingStart?: () => void;
     onRecordingError?: () => void;
+    onBeforeRecording?: () => void;
+    word?: string;
     disabled?: boolean;
 }
 
@@ -43,16 +45,22 @@ export default function AudioRecorder({
                                           onRecordingComplete,
                                           onRecordingStart,
                                           onRecordingError,
+                                          onBeforeRecording,
+                                          word,
                                           disabled = false
                                       }: AudioRecorderProps) {
     const [isRecording, setIsRecording] = useState(false);
+    const [isStarting, setIsStarting] = useState(false);
     const [recorderError, setRecorderError] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const audioChunksRef = useRef<BlobPart[]>([]);
+    const mountedRef = useRef(true);
 
     useEffect(() => {
+        mountedRef.current = true;
         return () => {
+            mountedRef.current = false;
             stopActiveStream();
         };
     }, []);
@@ -67,7 +75,7 @@ export default function AudioRecorder({
     }
 
     async function startRecording() {
-        if (isRecording || disabled) {
+        if (isRecording || isStarting || disabled) {
             return;
         }
 
@@ -78,8 +86,14 @@ export default function AudioRecorder({
 
         try {
             setRecorderError(null);
+            setIsStarting(true);
+            onBeforeRecording?.();
 
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            if (!mountedRef.current) {
+                stream.getTracks().forEach(track => track.stop());
+                return;
+            }
             const mimeType = getSupportedAudioMimeType();
             const recorder = new MediaRecorder(
                 stream,
@@ -113,6 +127,7 @@ export default function AudioRecorder({
             recorder.addEventListener(
                 "stop",
                 () => {
+                    if (!mountedRef.current) return;
                     const audioBlob = new Blob(
                         audioChunksRef.current,
                         {
@@ -146,6 +161,8 @@ export default function AudioRecorder({
             onRecordingError?.();
             setIsRecording(false);
             stopActiveStream();
+        } finally {
+            if (mountedRef.current) setIsStarting(false);
         }
     }
 
@@ -171,16 +188,18 @@ export default function AudioRecorder({
         <Stack spacing={1}>
             <Button
                 variant={isRecording ? "outlined" : "contained"}
-                disabled={disabled}
+                disabled={disabled || isStarting}
+                aria-label={`${isRecording ? "Stop recording" : "Record"}${word ? ` ${word}` : " your voice"}`}
+                aria-pressed={isRecording}
                 color={isRecording ? "error" : "primary"}
-                startIcon={isRecording ? <StopIcon /> : <MicIcon />}
+                startIcon={isStarting ? undefined : isRecording ? <StopIcon /> : <MicIcon />}
                 onClick={handleRecordButtonClick}
             >
-                {isRecording ? "Stop Recording" : "Record Voice"}
+                {isStarting ? "Opening..." : isRecording ? "Stop" : "Record"}
             </Button>
 
             {recorderError && (
-                <Typography color="error">
+                <Typography color="error" role="alert">
                     {recorderError}
                 </Typography>
             )}

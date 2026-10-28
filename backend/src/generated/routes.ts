@@ -29,7 +29,6 @@ const models: TsoaRoute.Models = {
             "difficulty": {"dataType":"string","required":true},
             "category": {"dataType":"string","required":true},
             "courses": {"dataType":"array","array":{"dataType":"string"},"required":true},
-            "referenceAudio": {"dataType":"string","required":true},
             "phoneticPronunciationText": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
