@@ -1,4 +1,5 @@
 import {injectable} from "inversify";
+import {PronunciationEvaluator} from "./pronunciation_evaluator.js";
 
 @injectable()
 export class SpeechmaticsService {
@@ -26,11 +27,42 @@ export class SpeechmaticsService {
         contentType: string,
         expectedText: string,
     ): Promise<unknown> {
+
+        const jobs = await Promise.allSettled([
+            this.runJob(audio, filename, contentType, expectedText, false),
+            this.runJob(audio, filename, contentType, expectedText, true),
+        ]);
+
+        const results = jobs.map((job, index) => ({
+            type: index === 0 ? "standard" : "enhanced_contextual",
+            status: job.status,
+            ...(job.status === "fulfilled"
+                    ? {transcript: job.value}
+                    : {error: String(job.reason)}
+            ),
+        }));
+
+        return {
+            expectedText,
+            evaluation: PronunciationEvaluator.evaluate(expectedText, results),
+            results,
+        };
+    }
+
+    private async runJob(
+        audio: Buffer,
+        filename: string,
+        contentType: string,
+        expectedText: string,
+        useAdditionalVocab: boolean,
+    ): Promise<unknown> {
+
         const jobId = await this.createJob(
             audio,
             filename,
             contentType,
             expectedText,
+            useAdditionalVocab,
         );
 
         await this.waitForJob(jobId);
@@ -43,6 +75,7 @@ export class SpeechmaticsService {
         filename: string,
         contentType: string,
         expectedText: string,
+        useAdditionalVocab: boolean,
     ): Promise<string> {
         const formData = new FormData();
 
@@ -57,11 +90,14 @@ export class SpeechmaticsService {
             type: "transcription",
             transcription_config: {
                 language: "pl",
-                additional_vocab: [
-                    {
-                        content: expectedText,
-                    },
-                ],
+                model: useAdditionalVocab ? "enhanced" : "standard",
+                ...(useAdditionalVocab && {
+                    additional_vocab: [
+                        {
+                            content: expectedText,
+                        },
+                    ],
+                }),
             },
         };
 
@@ -95,7 +131,9 @@ export class SpeechmaticsService {
         jobId: string,
     ): Promise<void> {
 
-        while (true) {
+        const timeout = Date.now() + 120000;
+
+        while (Date.now() < timeout) {
 
             const response = await fetch(
                 `${this.baseUrl}/jobs/${jobId}`,
@@ -142,6 +180,9 @@ export class SpeechmaticsService {
 
             await this.delay(1000);
         }
+        throw new Error(
+            `Speechmatics job ${jobId} timed out`,
+        );
     }
 
     private async getTranscript(

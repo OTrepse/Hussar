@@ -1,4 +1,5 @@
 import {injectable} from 'inversify';
+import {Pool} from 'pg';
 import {PracticeItem} from '../classes/practice_item.js';
 
 export interface PracticeItemsRepository {
@@ -13,46 +14,77 @@ export const PracticeItemsRepository =
 export class PracticeItemsRepositoryImpl
     implements PracticeItemsRepository {
 
-    private readonly practiceItems: PracticeItem[] = [
-        {
-            id: 1,
-            polishText: 'Cześć',
-            englishText: 'Hello',
-            difficulty: 'beginner',
-            category: 'greetings',
-            courses: ['Polish 101'],
-            referenceAudio: '',
-            phoneticPronunciationText: 'chesh-ch'
-        },
-        {
-            id: 2,
-            polishText: 'Dzień dobry',
-            englishText: 'Good morning',
-            difficulty: 'beginner',
-            category: 'greetings',
-            courses: ['Polish 101'],
-            referenceAudio: '',
-            phoneticPronunciationText: 'jen DOH-bri'
-        },
-        {
-            id: 3,
-            polishText: 'Dziękuję',
-            englishText: 'Thank you',
-            difficulty: 'beginner',
-            category: 'common-phrases',
-            courses: ['Polish 101'],
-            referenceAudio: '',
-            phoneticPronunciationText: 'jen-KOO-yeh'
+    private readonly pool: Pool;
+
+    constructor() {
+        if (!process.env.DATABASE_URL) {
+            throw new Error("DATABASE_URL is not configured");
         }
-    ];
+
+        this.pool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+        });
+    }
 
     async listPracticeItems(): Promise<PracticeItem[]> {
-        return this.practiceItems;
+        const result = await this.pool.query(`
+            SELECT
+                pi.id,
+                pi.polish_text AS "polishText",
+                pi.english_text AS "englishText",
+                pi.difficulty,
+                pi.category,
+                pi.phonetic_pronunciation_text AS "phoneticPronunciationText",
+                ARRAY(
+                    SELECT c.name
+                    FROM course_practice_items cpi
+                    JOIN courses c ON c.id = cpi.course_id
+                    WHERE cpi.practice_item_id = pi.id
+                    ORDER BY c.name
+                ) AS courses
+            FROM practice_items pi
+            ORDER BY pi.id
+        `);
+
+        return result.rows.map(row => ({
+            ...row,
+            id: Number(row.id),
+            phoneticPronunciationText: row.phoneticPronunciationText ?? "",
+        })) as PracticeItem[];
     }
 
     async getPracticeItem(
         id: number
     ): Promise<PracticeItem | undefined> {
-        return this.practiceItems.find(item => item.id === id);
+        const result = await this.pool.query(`
+            SELECT
+                pi.id,
+                pi.polish_text AS "polishText",
+                pi.english_text AS "englishText",
+                pi.difficulty,
+                pi.category,
+                pi.phonetic_pronunciation_text AS "phoneticPronunciationText",
+                ARRAY(
+                    SELECT c.name
+                    FROM course_practice_items cpi
+                    JOIN courses c ON c.id = cpi.course_id
+                    WHERE cpi.practice_item_id = pi.id
+                    ORDER BY c.name
+                ) AS courses
+            FROM practice_items pi
+            WHERE pi.id = $1
+        `, [id]);
+
+        if (result.rows.length === 0) {
+            return undefined;
+        }
+
+        const row = result.rows[0];
+
+        return {
+            ...row,
+            id: Number(row.id),
+            phoneticPronunciationText: row.phoneticPronunciationText ?? "",
+        } as PracticeItem;
     }
 }

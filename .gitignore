@@ -33,3 +33,5 @@ temp/
 
 # Supabase local output
 .supabase/
+/backend/src/generated/routes.ts
+/backend/src/generated/swagger.json

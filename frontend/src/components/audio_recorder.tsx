@@ -15,6 +15,9 @@ import {
 
 interface AudioRecorderProps {
     onRecordingComplete?: (audio: Blob) => void;
+    onRecordingStart?: () => void;
+    onRecordingError?: () => void;
+    disabled?: boolean;
 }
 
 const preferredAudioMimeTypes = [
@@ -36,7 +39,12 @@ function getSupportedAudioMimeType(): string {
     );
 }
 
-export default function AudioRecorder({ onRecordingComplete }: AudioRecorderProps) {
+export default function AudioRecorder({
+                                          onRecordingComplete,
+                                          onRecordingStart,
+                                          onRecordingError,
+                                          disabled = false
+                                      }: AudioRecorderProps) {
     const [isRecording, setIsRecording] = useState(false);
     const [recorderError, setRecorderError] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -59,7 +67,7 @@ export default function AudioRecorder({ onRecordingComplete }: AudioRecorderProp
     }
 
     async function startRecording() {
-        if (isRecording) {
+        if (isRecording || disabled) {
             return;
         }
 
@@ -120,20 +128,22 @@ export default function AudioRecorder({ onRecordingComplete }: AudioRecorderProp
                     stopActiveStream();
 
                     if (audioBlob.size > 0) {
-                        onRecordingComplete?.(
-                            audioBlob,
-                        );
+                        onRecordingComplete?.(audioBlob);
+                    } else {
+                        onRecordingError?.();
                     }
                 },
             );
 
             recorder.start();
+            onRecordingStart?.();
             setIsRecording(true);
 
         } catch {
             setRecorderError(
                 "Microphone access was blocked or unavailable.",
             );
+            onRecordingError?.();
             setIsRecording(false);
             stopActiveStream();
         }
@@ -161,6 +171,7 @@ export default function AudioRecorder({ onRecordingComplete }: AudioRecorderProp
         <Stack spacing={1}>
             <Button
                 variant={isRecording ? "outlined" : "contained"}
+                disabled={disabled}
                 color={isRecording ? "error" : "primary"}
                 startIcon={isRecording ? <StopIcon /> : <MicIcon />}
                 onClick={handleRecordButtonClick}

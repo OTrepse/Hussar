@@ -5,6 +5,5 @@ export interface PracticeItem {
     difficulty: string;
     category: string;
     courses: string[];
-    referenceAudio: string;
     phoneticPronunciationText: string;
 }
