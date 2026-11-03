@@ -11,7 +11,6 @@ Users can select Polish vocabulary from their courses, record their pronunciatio
 - **Pronunciation Practice:** Record Polish words and phrases directly through the browser.
 - **Speech Recognition:** Use the Speechmatics API to transcribe recorded audio.
 - **Pronunciation Evaluation:** Compare recognized speech against the expected Polish text to evaluate pronunciation accuracy.
-- **AI Feedback:** Use an LLM to generate additional feedback based on pronunciation evaluation results.
 - **Course Organization:** Organize vocabulary into courses, categories, and difficulty levels.
 - **Vocabulary Filtering:** Search, filter, and sort available practice items.
 - **Reference Pronunciation:** Support reference audio and phonetic pronunciation text for vocabulary.
@@ -33,13 +32,11 @@ Users can select Polish vocabulary from their courses, record their pronunciatio
 - tsoa (REST API routing and OpenAPI documentation)
 - Inversify (Dependency Injection)
 - Speechmatics Speech Recognition API
-- LLM API for pronunciation feedback
 
 ### Database and Authentication
 - PostgreSQL
 - Supabase Database
 - Supabase Authentication
-- Drizzle ORM
 
 ## Project Structure
 
@@ -58,7 +55,7 @@ Hussar/
 
 The frontend handles the user interface, audio recording, authentication, and displaying pronunciation feedback.
 
-The backend manages practice items, communicates with external speech recognition and AI services, and handles database operations.
+The backend manages practice items, communicates with the Speechmatics API, and handles database operations.
 
 ## Getting Started
 
@@ -68,15 +65,15 @@ Before running the project, install:
 
 - Node.js and npm
 - Git
-- Access to the project's Supabase instance
+- Access to a Supabase project
 - Speechmatics API credentials
-- Any required LLM API credentials
 
 ### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd Hussar
+npm install
 ```
 
 ### 2. Frontend Setup
@@ -101,9 +98,10 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_PUBLISHABLE_KEY=
 ```
 
-Start the frontend:
+Start the frontend from the root directory:
 
 ```bash
+cd ..
 npm run dev
 ```
 
@@ -125,15 +123,13 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file inside the backend directory.
+Create a `.env` file inside the backend directory:
 
 ```dotenv
 PORT=8080
 SPEECHMATICS_API_KEY=
 DATABASE_URL=
 ```
-
-Add the required database connection, Speechmatics API credentials, and LLM API configuration using the environment variable names expected by the backend.
 
 Generate the tsoa routes and OpenAPI specification:
 
@@ -152,11 +148,103 @@ The backend runs at:
 
 http://localhost:8080
 
-### 4. Supabase Configuration
+## Getting Your API Keys
+
+Hussar requires credentials for Supabase and Speechmatics.
+
+Each developer can configure their own credentials or use an existing shared project when appropriate access has been granted.
+
+### 1. Supabase Project URL and Publishable Key
+
+Supabase handles user authentication and PostgreSQL database hosting.
+
+1. Visit [Supabase](https://supabase.com/dashboard).
+2. Create an account or sign in.
+3. Select **New Project** to create your own project, or open an existing project you have access to.
+4. When creating a project, select an organization, enter a project name, configure a database password, and choose a region.
+5. Once the project is created, select **Connect** at the top of the dashboard to locate the project URL and publishable key.
+6. Alternatively, navigate to **Project Settings > API Keys** to find the publishable key.
+7. Copy the Project URL and publishable key into `frontend/.env`.
+
+```dotenv
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key
+```
+
+Use the publishable key, not the secret or service-role key, in the frontend.
+
+**Important:** Creating a new Supabase project does not automatically create Hussar's database tables or import its vocabulary. Developers using their own project must configure the required database schema and data.
+
+### 2. Supabase Database Connection
+
+The backend requires a PostgreSQL connection string to communicate with the database.
+
+1. Open your project in the [Supabase Dashboard](https://supabase.com/dashboard).
+2. Select **Connect** at the top of the project dashboard.
+3. Choose the appropriate PostgreSQL connection method.
+4. Copy the provided connection string.
+5. Replace the password placeholder with the database password configured when creating the project.
+6. Add the connection string to `backend/.env`.
+
+```dotenv
+DATABASE_URL=postgresql://username:password@host:5432/postgres
+```
+
+For persistent backend applications, a direct connection is appropriate when the development environment supports IPv6.
+
+If the direct connection cannot be reached, use the **Session Pooler** connection string from Supabase instead.
+
+The database password can be reset through the project's database settings if necessary.
+
+Do not place the database connection string in the frontend environment.
+
+### 3. Speechmatics API Key
+
+Speechmatics is used to transcribe recorded Polish audio for pronunciation evaluation.
+
+1. Visit the [Speechmatics Portal](https://portal.speechmatics.com/).
+2. Create an account or log in.
+3. Navigate to **Settings > API Keys**.
+4. Create a new API key.
+5. Give the key a recognizable name, such as `Hussar Development`.
+6. Copy the generated API key and store it securely.
+7. Add the key to `backend/.env`.
+
+```dotenv
+SPEECHMATICS_API_KEY=your-speechmatics-api-key
+```
+
+Speechmatics requires this API key to authenticate transcription requests.
+
+Make sure the account has the necessary API access and usage allowance before submitting transcription jobs.
+
+### 4. Verify Environment Configuration
+
+After configuring the credentials, verify that both environment files contain the required values.
+
+**Frontend (`frontend/.env`)**
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8080
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key
+```
+
+**Backend (`backend/.env`)**
+
+```dotenv
+PORT=8080
+SPEECHMATICS_API_KEY=your-speechmatics-api-key
+DATABASE_URL=your-postgresql-connection-string
+```
+
+Restart both development servers after changing environment variables.
+
+## Supabase Configuration
 
 Hussar uses Supabase for PostgreSQL database hosting and user authentication.
 
-#### Authentication
+### Authentication
 
 The frontend uses a shared Supabase client and authentication provider to manage:
 
@@ -168,7 +256,7 @@ The frontend uses a shared Supabase client and authentication provider to manage
 
 The existing backend user repository is a development stub and does not store user passwords or authentication credentials.
 
-#### Supabase Dashboard
+### Supabase Dashboard
 
 In the Supabase dashboard, navigate to:
 
@@ -189,7 +277,7 @@ http://localhost:5173/update-password
 
 Ensure the Supabase project URL and publishable key are configured in `frontend/.env`.
 
-### 5. Database Configuration
+## Database Configuration
 
 Hussar uses PostgreSQL through Supabase to store vocabulary and course information.
 
@@ -224,8 +312,6 @@ Database connection credentials must be configured in the backend environment be
 8. The frontend displays the results for the selected practice item.
 
 Speechmatics provides speech recognition results. Hussar's evaluation logic uses those results to estimate pronunciation accuracy rather than relying on a native Speechmatics pronunciation score.
-
-LLM-generated feedback can supplement the evaluation by providing additional explanations and suggestions.
 
 ## API
 
@@ -263,6 +349,7 @@ npx tsoa spec
 - Speech recognition requests are processed through the backend.
 - Database operations use the backend repository layer.
 - Never commit `.env` files containing credentials or API keys.
+- Avoid sharing database passwords or private API keys through GitHub or other public repositories.
 
 ## Project Goals
 
