@@ -129,6 +129,8 @@ Create a `.env` file inside the backend directory.
 
 ```dotenv
 PORT=8080
+SPEECHMATICS_API_KEY=
+DATABASE_URL=
 ```
 
 Add the required database connection, Speechmatics API credentials, and LLM API configuration using the environment variable names expected by the backend.
