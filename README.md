@@ -279,26 +279,64 @@ Ensure the Supabase project URL and publishable key are configured in `frontend/
 
 ## Database Configuration
 
-Hussar uses PostgreSQL through Supabase to store vocabulary and course information.
+Hussar uses PostgreSQL hosted through Supabase to store course information and Polish vocabulary.
 
-The database organizes practice content using:
+### Database Schema
 
-- **Courses:** Collections of Polish vocabulary associated with a class.
-- **Practice Items:** Individual Polish words and phrases available for pronunciation practice.
-- **Course-Practice Item Relationships:** Associations that allow vocabulary to be organized into courses.
+The database contains three tables:
 
-Practice items contain information such as:
+- **`courses`:** Stores course names and optional descriptions.
+- **`practice_items`:** Stores Polish vocabulary, English translations, difficulty levels, categories, and optional phonetic pronunciation text.
+- **`course_practice_items`:** Connects courses to practice items using a many-to-many relationship. A course can contain multiple practice items, and a practice item can belong to multiple courses.
 
-- Polish text
-- English translation
-- Difficulty
-- Category
-- Phonetic pronunciation text
-- Reference audio, when available
+| Table | Column | Type | Constraints |
+| --- | --- | --- | --- |
+| `courses` | `id` | `bigint` | Primary key, generated identity |
+| `courses` | `name` | `text` | Required, unique |
+| `courses` | `description` | `text` | Optional |
+| `practice_items` | `id` | `bigint` | Primary key, generated identity |
+| `practice_items` | `polish_text` | `text` | Required |
+| `practice_items` | `english_text` | `text` | Required |
+| `practice_items` | `difficulty` | `text` | Required |
+| `practice_items` | `category` | `text` | Required |
+| `practice_items` | `phonetic_pronunciation_text` | `text` | Optional |
+| `course_practice_items` | `course_id` | `bigint` | Primary key component, foreign key to `courses.id` |
+| `course_practice_items` | `practice_item_id` | `bigint` | Primary key component, foreign key to `practice_items.id` |
 
-The backend accesses this information through its repository layer.
+### SQL Schema
 
-Database connection credentials must be configured in the backend environment before database-dependent endpoints can be used.
+To create the tables in a new Supabase project, run the following SQL in the Supabase SQL Editor:
+
+```sql
+CREATE TABLE public.courses (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  name text NOT NULL UNIQUE,
+  description text,
+  CONSTRAINT courses_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.practice_items (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  polish_text text NOT NULL,
+  english_text text NOT NULL,
+  difficulty text NOT NULL,
+  category text NOT NULL,
+  phonetic_pronunciation_text text,
+  CONSTRAINT practice_items_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.course_practice_items (
+  course_id bigint NOT NULL,
+  practice_item_id bigint NOT NULL,
+  CONSTRAINT course_practice_items_pkey PRIMARY KEY (course_id, practice_item_id),
+  CONSTRAINT course_practice_items_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id),
+  CONSTRAINT course_practice_items_practice_item_id_fkey FOREIGN KEY (practice_item_id) REFERENCES public.practice_items(id)
+);
+```
+
+The `course_practice_items` composite primary key prevents duplicate associations between the same course and practice item. The schema creates the tables but does not populate them with courses or vocabulary.
+
+The backend accesses these tables through its repository layer. Configure `DATABASE_URL` in `backend/.env` before using database-dependent endpoints.
 
 ## How Pronunciation Evaluation Works
 
