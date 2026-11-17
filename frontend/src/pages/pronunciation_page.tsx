@@ -28,8 +28,10 @@ import {
 import {useEffect, useState} from "react";
 import {listPracticeItems} from "../api/practice_items_api";
 import type {PracticeItem} from "../types/practice_item";
+import usePronunciationHistory from "../hooks/use_pronunciation_history";
 
 export default function PronunciationPage() {
+    const { saveHistory, historySaveError, dismissHistorySaveError } = usePronunciationHistory();
     const [speechmaticsResult, setSpeechmaticsResult] = useState<SpeechResponse | null>(null);
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -108,6 +110,7 @@ export default function PronunciationPage() {
             const result = await transcribeAudio(audio, practiceItemId);
 
             setSpeechmaticsResult(result);
+            saveHistory(practiceItemId, result);
         } catch (error) {
             console.error(error);
 
@@ -136,6 +139,7 @@ export default function PronunciationPage() {
                 >
 
                     <Stack spacing={3}>
+                        {historySaveError && <Alert severity="warning" onClose={dismissHistorySaveError}>{historySaveError}</Alert>}
                         <Box>
                             <Typography className="eyebrow">A LITTLE PRACTICE, EVERY DAY</Typography>
                             <Typography
