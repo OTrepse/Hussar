@@ -37,6 +37,7 @@ export default function PronunciationPage() {
     const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
     const [recordingItemId, setRecordingItemId] = useState<number | null>(null);
     const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+    const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
     const [searchInput, setSearchInput] = useState("");
     const [page, setPage] = useState(1);
@@ -50,9 +51,17 @@ export default function PronunciationPage() {
         practiceItems.flatMap(item => item.courses)
     )].sort();
 
+    const lessons = [...new Set(
+        practiceItems
+            .filter(item => item.courses.includes(selectedCourse ?? ""))
+            .map(item => item.category)
+            .filter((category): category is string => Boolean(category))
+    )].sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+
     const coursePracticeItems = practiceItems
         .filter(item =>
                 item.courses.includes(selectedCourse ?? "")
+                && (selectedLesson === null || item.category === selectedLesson)
                 && (
                     item.polishText.toLocaleLowerCase("pl").includes(searchInput.toLocaleLowerCase("pl"))
                     || item.englishText.toLowerCase().includes(searchInput.toLowerCase())
@@ -63,6 +72,7 @@ export default function PronunciationPage() {
                 ? a.polishText.localeCompare(b.polishText, "pl")
                 : b.polishText.localeCompare(a.polishText, "pl")
         );
+
 
     const paginatedItems = coursePracticeItems.slice(
         (page - 1) * itemsPerPage,
@@ -85,7 +95,7 @@ export default function PronunciationPage() {
 
     useEffect(() => {
         cancelSpeech();
-    }, [selectedCourse, page, searchInput, cancelSpeech]);
+    }, [selectedCourse, selectedLesson, page, searchInput, cancelSpeech]);
 
     async function handleRecordingComplete(audio: Blob, practiceItemId: number) {
         try {
@@ -173,6 +183,7 @@ export default function PronunciationPage() {
                                                 disabled={activeRecordingId !== null || isTranscribing}
                                                 onClick={() => {
                                                     setSelectedCourse(course);
+                                                    setSelectedLesson(null);
                                                     setSelectedItemId(null);
                                                     setRecordingItemId(null);
                                                     setSpeechmaticsResult(null);
@@ -242,6 +253,35 @@ export default function PronunciationPage() {
                                     >
                                         <Autocomplete
                                             disabled={practiceIsBusy}
+                                            options={lessons}
+                                            value={selectedLesson}
+                                            onChange={(_, value) => {
+                                                setSelectedLesson(value);
+                                                setSelectedItemId(null);
+                                                setRecordingItemId(null);
+                                                setSpeechmaticsResult(null);
+                                                setError(null);
+                                                setSearchInput("");
+                                                setPage(1);
+                                            }}
+                                            getOptionLabel={option =>
+                                                option.replace(/^lesson-(\d+)$/i, (_, number) => `Lesson ${Number(number)}`)
+                                            }
+                                            renderInput={params => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Filter by Lesson"
+                                                    placeholder="All Lessons"
+                                                />
+                                            )}
+                                            sx={{
+                                                width: {xs: "100%", sm: 210},
+                                                flexShrink: 0
+                                            }}
+                                        />
+
+                                        <Autocomplete
+                                            disabled={practiceIsBusy}
                                             fullWidth
                                             options={coursePracticeItems}
                                             value={practiceItems.find(item => item.id === selectedItemId) ?? null}
@@ -304,7 +344,11 @@ export default function PronunciationPage() {
                                             gap: 2
                                         }}
                                     >
-                                        {coursePracticeItems.length === 0 && <Alert severity="info">No matching words. Try a different Polish or English search.</Alert>}
+                                        {coursePracticeItems.length === 0 && (
+                                            <Alert severity="info">
+                                                No matching words found. Try another lesson or search term.
+                                            </Alert>
+                                        )}
                                         {paginatedItems.map(item => (
                                             <Card
                                                 key={item.id}
