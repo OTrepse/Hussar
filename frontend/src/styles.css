@@ -235,3 +235,359 @@ body { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #f2eaf5;
+  background: #15121b;
+}
+
+[data-theme="dark"] {
+  --dark-bg: #15121b;
+  --dark-surface: #211b2a;
+  --dark-surface-alt: #2d2437;
+  --dark-border: #93809e;
+  --dark-text: #f2eaf5;
+  --dark-muted: #b9a9c4;
+  --dark-purple: #c6a1e5;
+  --dark-pink: #f078b2;
+}
+
+[data-theme="dark"] .appShell,
+[data-theme="dark"] .siteShell {
+  background: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .siteHeader {
+  background: var(--dark-surface);
+  border-bottom-color: var(--dark-border);
+}
+
+[data-theme="dark"] .brand,
+[data-theme="dark"] .footerBrand,
+[data-theme="dark"] .heroTitle.MuiTypography-root,
+[data-theme="dark"] .sectionTitle.MuiTypography-root,
+[data-theme="dark"] .pageTitle.MuiTypography-root,
+[data-theme="dark"] .coursesPanel h1,
+[data-theme="dark"] .courseCard h3,
+[data-theme="dark"] .practiceCard h3,
+[data-theme="dark"] .aboutFeature h3,
+[data-theme="dark"] .stepCard h3,
+[data-theme="dark"] .historyEmpty h2,
+[data-theme="dark"] .authCard h1 {
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .eyebrow.MuiTypography-root,
+[data-theme="dark"] .heroTitle span,
+[data-theme="dark"] .courseCardLink.MuiTypography-root,
+[data-theme="dark"] .stepIcon,
+[data-theme="dark"] .learningStrip svg,
+[data-theme="dark"] .artSpark {
+  color: var(--dark-pink);
+}
+
+[data-theme="dark"] .navLink.MuiButton-root,
+[data-theme="dark"] .heroDescription.MuiTypography-root,
+[data-theme="dark"] .heroNote.MuiTypography-root,
+[data-theme="dark"] .siteFooter.MuiContainer-root,
+[data-theme="dark"] .learningStrip,
+[data-theme="dark"] .sectionDescription.MuiTypography-root {
+  color: var(--dark-muted);
+}
+
+[data-theme="dark"] .navLink.MuiButton-root:hover,
+[data-theme="dark"] .navLink.isActive.MuiButton-root {
+  background: var(--dark-surface-alt);
+  color: var(--dark-pink);
+}
+
+[data-theme="dark"] .navLink.isActive::after {
+  background: var(--dark-pink);
+}
+
+[data-theme="dark"] .menuToggle.MuiIconButton-root {
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .siteFooter.MuiContainer-root,
+[data-theme="dark"] .learningStrip,
+[data-theme="dark"] .recordingPanel {
+  border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .howSection {
+  background: #1b1623;
+}
+
+[data-theme="dark"] .stepCard,
+[data-theme="dark"] .wordPlaceholder,
+[data-theme="dark"] .historyEmpty,
+[data-theme="dark"] .soundCard,
+[data-theme="dark"] .authCard {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .practiceCard {
+  background: var(--dark-surface) !important;
+  border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .courseCard {
+  border-color: var(--dark-border) !important;
+}
+
+[data-theme="dark"] .courseIcon,
+[data-theme="dark"] .featureIcon,
+[data-theme="dark"] .historyIcon,
+[data-theme="dark"] .soundIcon {
+  background: var(--dark-surface-alt);
+  color: var(--dark-purple);
+}
+
+[data-theme="dark"] .pinkIcon {
+  color: var(--dark-pink);
+}
+
+[data-theme="dark"] .soundCard strong {
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .soundCard div > span,
+[data-theme="dark"] .stepCard p {
+  color: var(--dark-muted);
+}
+
+[data-theme="dark"] .courseCta,
+[data-theme="dark"] .letterCard {
+  background: #402254;
+}
+
+[data-theme="dark"] .courseCta .sectionTitle,
+[data-theme="dark"] .courseCta p {
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .artPetal {
+  background: #392845;
+}
+
+[data-theme="dark"] .artPetalTwo {
+  background: #51283f;
+}
+
+[data-theme="dark"] .artOrbit {
+  border-color: #765a87;
+}
+
+[data-theme="dark"] .accentTile {
+  border-color: var(--dark-bg);
+}
+
+[data-theme="dark"] .authShell {
+  background:
+          radial-gradient(ellipse at 10% 10%, #422a5260, transparent 45%),
+          radial-gradient(ellipse at 95% 95%, #642b4b40, transparent 40%),
+          var(--dark-bg);
+}
+
+[data-theme="dark"] .authCard .MuiInputLabel-outlined.MuiInputLabel-shrink {
+  background-color: var(--dark-surface);
+}
+
+[data-theme="dark"] .pronunciationPanel,
+[data-theme="dark"] .wordPlaceholder {
+  border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .Mui-focusVisible,
+[data-theme="dark"] :focus-visible {
+  outline-color: var(--dark-pink) !important;
+}
+
+[data-theme="dark"] ::selection {
+  background: #68365c;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .MuiOutlinedInput-notchedOutline {
+  border-color: #93809e;
+}
+
+[data-theme="dark"] .MuiInputLabel-root,
+[data-theme="dark"] .MuiFormHelperText-root {
+  color: #b9a9c4;
+}
+
+[data-theme="dark"] .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #c6a1e5;
+}
+
+[data-theme="dark"] .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #f078b2;
+  border-width: 2px;
+}
+
+[data-theme="dark"] :focus-visible,
+[data-theme="dark"] .Mui-focusVisible {
+  outline: 3px solid #f078b2 !important;
+  outline-offset: 3px;
+}
+
+[data-theme="dark"] .MuiButton-containedPrimary {
+  background: #c6a1e5;
+  color: #15121b;
+}
+
+[data-theme="dark"] .MuiButton-containedSecondary {
+  background: #f078b2;
+  color: #15121b;
+}
+
+[data-theme="dark"] .MuiAlert-root {
+  border: 1px solid currentColor;
+}
+
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #ffffff;
+  background: #0d0b12;
+}
+
+[data-theme="dark"] {
+  --dark-bg: #0d0b12;
+  --dark-surface: #262031;
+  --dark-surface-alt: #362a46;
+  --dark-border: #a18faf;
+  --dark-text: #ffffff;
+  --dark-muted: #d6c9e1;
+  --dark-purple: #d7b5ff;
+  --dark-pink: #ff91c3;
+}
+
+[data-theme="dark"] .siteHeader {
+  background: #1a1522;
+}
+
+[data-theme="dark"] .howSection {
+  background: #18121f;
+}
+
+[data-theme="dark"] .stepCard,
+[data-theme="dark"] .courseCard,
+[data-theme="dark"] .practiceCard,
+[data-theme="dark"] .wordPlaceholder,
+[data-theme="dark"] .historyEmpty,
+[data-theme="dark"] .authCard {
+  background: var(--dark-surface) !important;
+  color: var(--dark-text);
+  border: 1px solid var(--dark-border) !important;
+}
+
+[data-theme="dark"] .stepNumber {
+  color: var(--dark-purple);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .targetWord,
+[data-theme="dark"] .practiceCard h3,
+[data-theme="dark"] .courseCard h3,
+[data-theme="dark"] .stepCard h3 {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .aboutFeature p,
+[data-theme="dark"] .stepCard p,
+[data-theme="dark"] .historyEmpty p,
+[data-theme="dark"] .MuiTypography-colorTextSecondary {
+  color: var(--dark-muted);
+}
+
+[data-theme="dark"] .MuiInputBase-root {
+  background-color: #17121f;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .MuiOutlinedInput-root {
+  background-color: #17121f;
+}
+
+[data-theme="dark"] .MuiInputBase-input,
+[data-theme="dark"] .MuiSelect-select,
+[data-theme="dark"] .MuiAutocomplete-input {
+  color: #ffffff;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #d6c9e1;
+  opacity: 1;
+}
+
+[data-theme="dark"] .MuiOutlinedInput-notchedOutline {
+  border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .MuiInputLabel-root,
+[data-theme="dark"] .MuiFormHelperText-root {
+  color: var(--dark-muted);
+}
+
+[data-theme="dark"] .MuiAutocomplete-paper,
+[data-theme="dark"] .MuiMenu-paper,
+[data-theme="dark"] .MuiPopover-paper {
+  background-color: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .MuiAutocomplete-option[aria-selected="true"],
+[data-theme="dark"] .MuiMenuItem-root.Mui-selected {
+  background-color: var(--dark-surface-alt);
+  color: var(--dark-text);
+}
+
+[data-theme="dark"] .MuiPaginationItem-root {
+  color: var(--dark-text);
+  border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .MuiPaginationItem-root.Mui-selected {
+  background-color: var(--dark-purple);
+  color: var(--dark-bg);
+}
+
+[data-theme="dark"] .MuiButton-outlined {
+  border-color: var(--dark-purple);
+}
+
+[data-theme="dark"] .MuiButton-containedPrimary {
+  background-color: var(--dark-purple);
+  color: var(--dark-bg);
+}
+
+[data-theme="dark"] .MuiButton-containedSecondary {
+  background-color: var(--dark-pink);
+  color: var(--dark-bg);
+}
+
+[data-theme="dark"] .MuiButton-containedPrimary:hover {
+  background-color: #e5ceff;
+}
+
+[data-theme="dark"] .MuiButton-containedSecondary:hover {
+  background-color: #ffc0dc;
+}
+
+[data-theme="dark"] .MuiIconButton-root {
+  color: var(--dark-purple);
+}
+
+[data-theme="dark"] .Mui-disabled {
+  opacity: 0.65;
+}
+

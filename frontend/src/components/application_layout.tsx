@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import DarkModeRoundedIcon from "@mui/icons-material/DarkModeRounded";
+import LightModeRoundedIcon from "@mui/icons-material/LightModeRounded";
 import { Box, Button, Container, IconButton } from "@mui/material";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -6,7 +8,14 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import AccountControls from "./account_controls";
 import BrandMark from "./brand_mark";
 
-export default function ApplicationLayout() {
+
+interface ApplicationLayoutProps {
+    mode: "light" | "dark";
+    setMode: (mode: "light" | "dark") => void;
+}
+
+export default function ApplicationLayout({ mode, setMode }: ApplicationLayoutProps) {
+
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -73,7 +82,21 @@ export default function ApplicationLayout() {
                                 {link.label}
                             </Button>
                         ))}
-                        <Box className="navAccount"><AccountControls /></Box>
+                        <Box display="flex" alignItems="center" gap={1} className="navAccount">
+                            <IconButton
+                                onClick={() => setMode(mode === "dark" ? "light" : "dark")}
+                                aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                                title={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                                sx={{
+                                    color: "text.primary",
+                                    minWidth: 44,
+                                    minHeight: 44
+                                }}
+                            >
+                                {mode === "dark" ? <LightModeRoundedIcon /> : <DarkModeRoundedIcon />}
+                            </IconButton>
+                            <AccountControls />
+                        </Box>
                     </Box>
                 </Container>
             </Box>
